@@ -1,37 +1,117 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Form = ({ handleSubmit, history }) => {
-  const [searchEntry, setSearchEntry] = useState("");
-  // update search text state
-  const updateSearchInput = e => {
-    setSearchEntry(e.target.value);
+
+  const [websiteUrl, setWebsite] = useState("");
+  const [gstNumber, setGst] = useState("");
+
+  const [status, setStatus] = useState("");
+  const [cat, setCat] = useState("");
+  const [scat, setsCat] = useState("");
+  const [rcat, setRcat] = useState("");
+  const [con, setCon] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(false)
+
+  
+  const updateWebsite = e => {
+    setWebsite(e.target.value);
   };
+
+  const updateGst = e => {
+    setGst(e.target.value);
+  };
+  
+  const handleSubmitForm = function() {
+      setData(false)
+      setLoading(true)
+      fetch('https://4700-115-110-224-178.in.ngrok.io/upload', {
+        method: 'POST',
+        body: JSON.stringify({url: websiteUrl})
+      }).then(response=>response.json())
+        .then(data=>{ 
+          
+          setCat(data['Category'])
+          setsCat(data['Sub-Category'])
+          setCon(data['confidence_score'])
+          setStatus(data['activation_status'])
+          setData(true)
+         })
+        .catch((err) => {
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+  }
+
+  var submitted = false
   return (
-    <form
-      className="search-form"
-      onSubmit={e => handleSubmit(e, history, searchEntry)}
-    >
-      <input
-        type="text"
-        name="search"
-        placeholder="Search..."
-        onChange={updateSearchInput}
-        value={searchEntry}
-      />
-      <button
-        type="submit"
-        className={`search-button ${searchEntry.trim() ? "active" : null}`}
-        disabled={!searchEntry.trim()}
-      >
-        <svg height="32" width="32">
-          <path
-            d="M19.427 21.427a8.5 8.5 0 1 1 2-2l5.585 5.585c.55.55.546 1.43 0 1.976l-.024.024a1.399 1.399 0 0 1-1.976 0l-5.585-5.585zM14.5 21a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"
-            fill="#ffffff"
-            fillRule="evenodd"
-          />
-        </svg>
+
+    <div id="widgetContainer" class ="field">
+    <div id="formContainer">
+      <form action="" className="input-field">
+      <div class="col-3 input-effect">
+        	<input class="effect-5 " type="text"  onChange={updateWebsite}
+        value={websiteUrl} placeholder="Website URL"/>
+          <span class="focus-border"></span>
+        </div>
+        <div class="col-3 input-effect">
+        	<input class="effect-5" type="text"  onChange={updateGst}
+        value={gstNumber}  placeholder="GSTIN Number"/>
+          <span class="focus-border"></span>
+        </div>
+      </form>
+      <button className="waves-effect waves-light btn" onClick={handleSubmitForm}>
+        SUBMIT
       </button>
-    </form>
+    </div>
+    <div className="border" />
+    {loading && 
+    <div className = "center">
+     <img src="https://i.pinimg.com/originals/c0/c9/c2/c0c9c2a6b0a99053b87b14114c876000.gif" />
+     </div>
+    } 
+    {data && (<>
+    <div id="outputContainer">
+      <h1>Automated MCC Check Result</h1>
+      <table class="styled-table">
+    <thead>
+        <tr>
+            <th> </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    
+       <tr class="active-row">
+            <td>Status</td>
+            <td>{status}</td>
+        </tr>
+        <tr>
+            <td>Business Category</td>
+            <td>{cat}</td>
+        </tr> 
+        <tr>
+            <td>Business Sub Category</td>
+            <td>{scat}</td>
+        </tr> 
+        <tr>
+            <td>Razorpay Category</td>
+            <td>Others</td>
+        </tr> 
+        <tr>
+            <td>Confidence</td>
+            <td>{con}</td>
+        </tr> 
+     
+    </tbody>
+</table>
+  
+    </div>
+    </>
+      )
+      }
+  </div>
   );
 };
 
